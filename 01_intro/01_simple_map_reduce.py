@@ -1,4 +1,3 @@
-from optparse import Values
 from mrjob.job import MRJob
 
 class MRwordCount(MRJob):
