@@ -19,12 +19,6 @@ class MRFlights(MRJob):
         DIVERTED,CANCELLED,CANCELLATION_REASON,AIR_SYSTEM_DELAY,SECURITY_DELAY,
         AIRLINE_DELAY,LATE_AIRCRAFT_DELAY,WEATHER_DELAY) = line.split(",")
 
-        #  to check if there are missing values
-        # try:
-        #     DEPARTURE_DELAY = float(DEPARTURE_DELAY)
-        # except:
-        #     yield None, DEPARTURE_DELAY
-
         if DEPARTURE_DELAY == "":
             DEPARTURE_DELAY = 0 
         
@@ -34,12 +28,9 @@ class MRFlights(MRJob):
             ARRIVAL_DELAY = 0
 
         ARRIVAL_DELAY = float(ARRIVAL_DELAY)
-        MONTH = int(MONTH)
 
-        # added month formatting later to be sorted
-        # this adds leading zeros
-        yield f"{MONTH:02d}", (DEPARTURE_DELAY, ARRIVAL_DELAY)
-
+        yield AIRLINE, (DEPARTURE_DELAY, ARRIVAL_DELAY)
+    
     def reducer(self, key, values):
         total_dep_delay = 0
         total_arr_delay = 0

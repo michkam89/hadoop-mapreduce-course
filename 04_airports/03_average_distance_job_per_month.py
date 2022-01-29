@@ -1,5 +1,3 @@
-from audioop import avg
-from posixpath import split
 from mrjob.job import MRJob
 from mrjob.step import MRStep
 

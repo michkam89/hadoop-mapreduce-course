@@ -7,9 +7,15 @@ class MRFlights(MRJob):
         return [
             MRStep(
                 mapper=self.mapper,
+                reducer_init=self.reducer_init,
                 reducer=self.reducer
                 )
         ]
+
+    def configure_args(self):
+        super(MRFlights, self).configure_args()
+        self.add_file_arg('--airlines', help='Path to the airlines.csv')
+
 
     def mapper(self, _, line):
         (YEAR,MONTH,DAY,DAY_OF_WEEK,AIRLINE,FLIGHT_NUMBER,TAIL_NUMBER,
@@ -18,12 +24,6 @@ class MRFlights(MRJob):
         DISTANCE,WHEELS_ON,TAXI_IN,SCHEDULED_ARRIVAL,ARRIVAL_TIME,ARRIVAL_DELAY,
         DIVERTED,CANCELLED,CANCELLATION_REASON,AIR_SYSTEM_DELAY,SECURITY_DELAY,
         AIRLINE_DELAY,LATE_AIRCRAFT_DELAY,WEATHER_DELAY) = line.split(",")
-
-        #  to check if there are missing values
-        # try:
-        #     DEPARTURE_DELAY = float(DEPARTURE_DELAY)
-        # except:
-        #     yield None, DEPARTURE_DELAY
 
         if DEPARTURE_DELAY == "":
             DEPARTURE_DELAY = 0 
@@ -34,12 +34,18 @@ class MRFlights(MRJob):
             ARRIVAL_DELAY = 0
 
         ARRIVAL_DELAY = float(ARRIVAL_DELAY)
-        MONTH = int(MONTH)
 
-        # added month formatting later to be sorted
-        # this adds leading zeros
-        yield f"{MONTH:02d}", (DEPARTURE_DELAY, ARRIVAL_DELAY)
+        yield AIRLINE, (DEPARTURE_DELAY, ARRIVAL_DELAY)
 
+    def reducer_init(self):
+        self.airline_names = {}
+
+        with open('airlines.csv', 'r') as file:
+            for line in file:
+                code, full_name = line.split(",")
+                full_name = full_name[:-1]
+                self.airline_names[code] = full_name
+    
     def reducer(self, key, values):
         total_dep_delay = 0
         total_arr_delay = 0
@@ -50,7 +56,7 @@ class MRFlights(MRJob):
             total_arr_delay += value[1]
             num_elements += 1
 
-        yield key, (total_dep_delay / num_elements, total_arr_delay / num_elements)
+        yield self.airline_names[key], (total_dep_delay / num_elements, total_arr_delay / num_elements)
 
 if __name__ == "__main__":
     MRFlights.run()
