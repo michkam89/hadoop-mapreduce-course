@@ -21,3 +21,7 @@ python 03_most_popular_pickup_location.py -r emr s3://<bucket-name>/data/* --out
 python 03_most_popular_pickup_location.py -r emr --num-core-instances 4  s3://<bucket-name>/data/* --output-dir=s3://<bucket-name>/output/job2
 ```
 __IMPORTANT__ MRjob fails on EMR clusters created on-demand with default params when jobs with multiple steps are specified in the job. After first job is completed, cluster is terminating and the following steps cannot be executed. Solution is to run on existing cluster (provide cluster ID) or add `--add-steps-in-batch` parameter to the commands
+
+__Bootstrap installation__
+  - new EMR clusters use `pip3` instead of `pip`
+  - #TODO fix bootstraping commands with ntlk library installation on cluster in `.mrjob.conf` file
